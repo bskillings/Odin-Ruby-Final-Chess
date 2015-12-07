@@ -145,13 +145,13 @@ class ChessIO
 	#announcing the winner
 	def initialize
 		@game = ChessGame.new
-		puts @game.board.create_chessboard_string
+	#	puts @game.board.create_chessboard_string
 	end
 
 end
 
 class ChessGame
-	attr_accessor :current_player, :board
+	attr_accessor :current_player, :board, :white_player, :black_player
 
 	def initialize
 		@white_player = Player.new("White")
@@ -198,7 +198,9 @@ class ChessGame
 
 	#forward one if blank, diagonal if full.  Forgot to put two forward on first turn
 	def find_pawn_move(current_square)
-		legal_pawn_moves = []
+		potential_pawn_moves = []
+		
+		#determine which direction is "forward"
 		if @board.squares[current_square].owner.color == "White"
 			starting_row = 2
 			forward = 1
@@ -206,60 +208,192 @@ class ChessGame
 			starting_row = 7
 			forward = -1
 		end 
+		
+		#move forward one square if empty
 		current_key = current_square
 		try_this_square_key = [current_key[0] + forward, current_key[1]]
-		if @board.squares[try_this_square_key] == nil && try_this_square_key[0] > 0 && try_this_square_key[0] < 9
-			legal_pawn_moves.push(try_this_square_key)
+		if @board.squares[try_this_square_key] == nil 
+			potential_pawn_moves.push(try_this_square_key)
 		end
 
+		#move forward two squares if first time moving
 		if current_key[0] == starting_row
 			first_move_square_key = [current_key[0] + (forward * 2), current_key[1]]
-			if @board.squares[first_move_square_key] == nil && first_move_square_key[0] > 0 && first_move_square_key[0] < 9
-				legal_pawn_moves.push(first_move_square_key)
+			if @board.squares[first_move_square_key] == nil 
+				potential_pawn_moves.push(first_move_square_key)
 			end
 		end
-test_capture_keys = [[current_key[0] + 1, current_key[1] - 1], [current_key[0] + 1, current_key[1] + 1]]
+		
+		#move forward diagonally if capturing
+		test_capture_keys = [[current_key[0] + 1, current_key[1] - 1], [current_key[0] + 1, current_key[1] + 1]]
 		test_capture_keys.each do |square|
 			unless @board.squares[square] == nil 
-				if square[0].between?(1, 8) && square[1].between?(1, 8)
-					if @board.squares[square].owner != @current_player 
-						legal_pawn_moves.push(square)
-					end
+				if @board.squares[square].owner != @current_player 
+					potential_pawn_moves.push(square)
 				end
 			end 
 		end
-		capture_right_key = [current_key[0] + 1, current_key[1] + 1]
-		unless @board.squares[capture_right_key] == nil 
-			if capture_right_key[0].between?(1, 8) && capture_right_key[1].between?(1, 8)
-				if @board.squares[capture_right_key].owner == @current_player 
-					puts "That's your piece" 
-					#placeholder
-				else
-					legal_pawn_moves.push(capture_right_key)
-				end
-				
-			end 
+		
+		#testing to make sure moves do not go off board
+		legal_pawn_moves = []
+		potential_pawn_moves.each do |move|
+			if move[0].between?(1, 8) && move[1].between?(1, 8)
+				legal_pawn_moves.push(move)
+			end
 		end
+		
+		#return array of possible moves
 		return legal_pawn_moves
 	end
 
 	#four cardinal directions, all squares until you capture or are blocked by own color
 	def find_rook_move(current_square)
+		legal_rook_moves = []
+		direction = 1 #up, then will go clockwise
 
+		test_this_square = current_square
+		while direction < 5 
+			while test_this_square[0].between?(1, 8) && test_this_square[1].between?(1, 8)
+				#determine which direction you're traveling
+				case direction
+				when 1
+					test_this_square = [test_this_square[0] - 1, test_this_square[1]]
+				when 2
+					test_this_square = [test_this_square[0], test_this_square[1] + 1]
+				when 3
+					test_this_square = [test_this_square[0] + 1, test_this_square[1]]
+				when 4
+					test_this_square = [test_this_square[0], test_this_square[1] - 1]
+				end
+
+				#change direction if owned or edge of board
+				if test_this_square[0].between?(1, 8) && test_this_square[1].between?(1, 8)
+					#if there is not a piece here
+					if @board.squares[test_this_square] == nil 
+						#add to the array of possible moves
+						legal_rook_moves.push(test_this_square)
+					#if there is a piece here
+					else 
+						#add to the array only if it's the opposite color
+						if @board.squares[test_this_square].owner != @board.squares[current_square].owner 
+							legal_rook_moves.push(test_this_square)
+						end
+						#if there is any piece here, break out of the loop so you can change direction
+						test_this_square = [100, 100]
+
+					#add to possible moves if blank
+					end
+				end
+			end
+			direction += 1
+			test_this_square = current_square
+		end
+		return legal_rook_moves
 	end
 
 	#find eight places for knights to go, not off board or on same color piece
 	def find_knight_move(current_square)
+		potential_knight_moves = []
 
 	end
 
 	#Four diagonal directions, all squares until you capture or are blocked by own color
 	def find_bishop_move(current_square)
+		legal_bishop_moves = []
+		direction = 1 #northeast, then will go clockwise
+
+		test_this_square = current_square
+		while direction < 5 
+			while test_this_square[0].between?(1, 8) && test_this_square[1].between?(1, 8)
+				#determine which direction you're traveling
+				case direction
+				when 1
+					test_this_square = [test_this_square[0] - 1, test_this_square[1] + 1]
+				when 2
+					test_this_square = [test_this_square[0] + 1, test_this_square[1] + 1]
+				when 3
+					test_this_square = [test_this_square[0] + 1, test_this_square[1] - 1]
+				when 4
+					test_this_square = [test_this_square[0] - 1, test_this_square[1] - 1]
+				end
+
+				#change direction if owned or edge of board
+				if test_this_square[0].between?(1, 8) && test_this_square[1].between?(1, 8)
+					#if there is not a piece here
+					if @board.squares[test_this_square] == nil 
+						#add to the array of possible moves
+						legal_bishop_moves.push(test_this_square)
+					#if there is a piece here
+					else 
+						#add to the array only if it's the opposite color
+						if @board.squares[test_this_square].owner != @board.squares[current_square].owner 
+							legal_bishop_moves.push(test_this_square)
+						end
+						#if there is any piece here, break out of the loop so you can change direction
+						test_this_square = [100, 100]
+
+					#add to possible moves if blank
+					end
+				end
+			end
+			direction += 1
+			test_this_square = current_square
+		end
+		return legal_bishop_moves
 
 	end
 
 	#eight directions, all squares until you capture or are blocked by own color
 	def find_queen_move(current_square)
+		legal_queen_moves = []
+		direction = 1 #up, then will go clockwise
+
+		test_this_square = current_square
+		while direction < 9 
+			while test_this_square[0].between?(1, 8) && test_this_square[1].between?(1, 8)
+				#determine which direction you're traveling
+				case direction
+				when 1
+					test_this_square = [test_this_square[0] - 1, test_this_square[1]]
+				when 2
+					test_this_square = [test_this_square[0] - 1, test_this_square[1] + 1]
+				when 3
+					test_this_square = [test_this_square[0], test_this_square[1] + 1]
+				when 4
+					test_this_square = [test_this_square[0] + 1, test_this_square[1] + 1]
+				when 5
+					test_this_square = [test_this_square[0] + 1, test_this_square[1]]
+				when 6
+					test_this_square = [test_this_square[0] + 1, test_this_square[1] - 1]
+				when 7
+					test_this_square = [test_this_square[0], test_this_square[1] - 1]
+				when 8
+					test_this_square = [test_this_square[0] - 1, test_this_square[1] - 1]
+				end
+
+				#change direction if owned or edge of board
+				if test_this_square[0].between?(1, 8) && test_this_square[1].between?(1, 8)
+					#if there is not a piece here
+					if @board.squares[test_this_square] == nil 
+						#add to the array of possible moves
+						legal_queen_moves.push(test_this_square)
+					#if there is a piece here
+					else 
+						#add to the array only if it's the opposite color
+						if @board.squares[test_this_square].owner != @board.squares[current_square].owner 
+							legal_queen_moves.push(test_this_square)
+						end
+						#if there is any piece here, break out of the loop so you can change direction
+						test_this_square = [100, 100]
+
+					#add to possible moves if blank
+					end
+				end
+			end
+			direction += 1
+			test_this_square = current_square
+		end
+		return legal_queen_moves
 
 	end
 
@@ -277,5 +411,5 @@ end
 
 start = ChessIO.new
 
-#after I have the piece moves defined I can start testing the logic
+#there is a lot of repeated code between find_rook_move, find_bishop_move, and find_queen_move
 #Then I will implement the io
