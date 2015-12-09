@@ -201,7 +201,7 @@ class ChessGame
 		potential_pawn_moves = []
 		
 		#determine which direction is "forward"
-		if @board.squares[current_square].owner.color == "White"
+		if @current_player .color == "White"
 			starting_row = 2
 			forward = 1
 		else
@@ -275,7 +275,7 @@ class ChessGame
 					#if there is a piece here
 					else 
 						#add to the array only if it's the opposite color
-						if @board.squares[test_this_square].owner != @board.squares[current_square].owner 
+						if @board.squares[test_this_square].owner != @current_player 
 							legal_rook_moves.push(test_this_square)
 						end
 						#if there is any piece here, break out of the loop so you can change direction
@@ -293,8 +293,27 @@ class ChessGame
 
 	#find eight places for knights to go, not off board or on same color piece
 	def find_knight_move(current_square)
+		#find all possible knight moves
 		potential_knight_moves = []
+		potential_knight_moves.push([current_square[0] + 1, current_square[1] + 2])
+		potential_knight_moves.push([current_square[0] + 2, current_square[1] + 1])
+		potential_knight_moves.push([current_square[0] + 2, current_square[1] - 1])
+		potential_knight_moves.push([current_square[0] + 1, current_square[1] - 2])
+		potential_knight_moves.push([current_square[0] - 1, current_square[1] - 2])
+		potential_knight_moves.push([current_square[0] - 2, current_square[1] - 1])
+		potential_knight_moves.push([current_square[0] - 2, current_square[1] + 1])
+		potential_knight_moves.push([current_square[0] - 1, current_square[1] + 2])
 
+		legal_knight_moves = []
+		potential_knight_moves.each do |move|
+			#check if square is actually on the board
+			if move[0].between?(1, 8) && move[1].between?(1, 8)
+				if @board.squares[move] == nil || @board.squares[move].owner != @current_player 
+					legal_knight_moves.push(move)
+				end
+			end
+		end
+		return legal_knight_moves
 	end
 
 	#Four diagonal directions, all squares until you capture or are blocked by own color
@@ -326,7 +345,7 @@ class ChessGame
 					#if there is a piece here
 					else 
 						#add to the array only if it's the opposite color
-						if @board.squares[test_this_square].owner != @board.squares[current_square].owner 
+						if @board.squares[test_this_square].owner != @current_player 
 							legal_bishop_moves.push(test_this_square)
 						end
 						#if there is any piece here, break out of the loop so you can change direction
@@ -380,7 +399,7 @@ class ChessGame
 					#if there is a piece here
 					else 
 						#add to the array only if it's the opposite color
-						if @board.squares[test_this_square].owner != @board.squares[current_square].owner 
+						if @board.squares[test_this_square].owner != @current_player 
 							legal_queen_moves.push(test_this_square)
 						end
 						#if there is any piece here, break out of the loop so you can change direction
@@ -399,7 +418,123 @@ class ChessGame
 
 	#eight directions unless same color or moving into check
 	def find_king_move(current_square)
+		potential_king_moves = []
+		potential_king_moves.push([current_square[0] + 1, current_square[1]])
+		potential_king_moves.push([current_square[0] + 1, current_square[1] + 1])
+		potential_king_moves.push([current_square[0], current_square[1] + 1])
+		potential_king_moves.push([current_square[0] - 1, current_square[1] + 1])
+		potential_king_moves.push([current_square[0] - 1, current_square[1]])
+		potential_king_moves.push([current_square[0] - 1, current_square[1] - 1])
+		potential_king_moves.push([current_square[0], current_square[1] - 1])
+		potential_king_moves.push([current_square[0] + 1, current_square[1] - 1])
 
+		legal_king_moves = []
+		potential_king_moves.each do |move|
+			#check if square is actually on the board
+			if move[0].between?(1, 8) && move[1].between?(1, 8)
+				#check if it is empty or contains another piece
+				if @board.squares[move] == nil || @board.squares[move].owner != @board.squares[current_square].owner
+					legal_king_moves.push(move)
+				end
+			end
+		end
+
+		#omit moves that would result in check
+		check_free_king_moves = []
+		legal_king_moves.each do |move|
+			 if check_for_check(move)
+			 	check_free_king_moves.push(move)
+			 end
+		end
+
+
+		return check_free_king_moves
+
+
+	end
+
+	def check_for_check(square_to_test)
+		move_is_okay = true
+		
+
+		pawn_could_kill_from_here = @current_player.color == "White" ? [[square_to_test[0] + 1, square_to_test[1] + 1]] : [square_to_test[0] + 1, square_to_test[1] - 1]
+		pawn_could_kill_from_here.each do |square|
+			if square[0].between?(1, 8) && square[1].between?(1, 8)
+				if @board.squares[square]
+					if @board.squares[square].owner != @current_player && @board.squares[square].rank == "Pawn"
+						move_is_okay = false
+					end
+				end
+			end
+		end
+
+		rook_could_kill_from_here = find_rook_move(square_to_test)
+		rook_could_kill_from_here.each do |square|
+			if @board.squares[square]
+				if @board.squares[square].owner != @current_player && @board.squares[square].rank == "Rook"
+					move_is_okay = false
+				end
+			end
+		end
+
+		knight_could_kill_from_here = find_knight_move(square_to_test)
+		knight_could_kill_from_here.each do |square|
+			if @board.squares[square]
+				if @board.squares[square].owner != @current_player && @board.squares[square].rank == "Knight"
+					move_is_okay = false
+				end
+			end
+		end
+
+		bishop_could_kill_from_here = find_bishop_move(square_to_test)
+		bishop_could_kill_from_here.each do |square|
+			if @board.squares[square]
+				if @board.squares[square].owner != @current_player && @board.squares[square].rank == "Bishop"
+					move_is_okay = false
+				end
+			end
+		end
+
+		queen_could_kill_from_here = find_queen_move(square_to_test)
+		queen_could_kill_from_here.each do |square|
+			if @board.squares[square]
+				if @board.squares[square].owner != @current_player && @board.squares[square].rank == "Queen"
+					move_is_okay = false
+				end
+			end
+		end
+
+		king_could_kill_from_here = []
+		one_space_from_king = []
+		one_space_from_king.push([square_to_test[0] + 1, square_to_test[1] + 1])
+		one_space_from_king.push([square_to_test[0] + 1, square_to_test[1]])
+		one_space_from_king.push([square_to_test[0] + 1, square_to_test[1] - 1])
+		one_space_from_king.push([square_to_test[0], square_to_test[1] - 1])
+		one_space_from_king.push([square_to_test[0] - 1, square_to_test[1] - 1])
+		one_space_from_king.push([square_to_test[0] - 1, square_to_test[1]])
+		one_space_from_king.push([square_to_test[0] - 1, square_to_test[1] + 1])
+		one_space_from_king.push([square_to_test[0], square_to_test[1] + 1])
+
+		one_space_from_king.each do |space|
+			if space[0].between?(1, 8) && space[1].between?(1, 8)
+				king_could_kill_from_here.push(space)
+			end
+		end
+
+		king_could_kill_from_here.each do |square|
+			if @board.squares[square]
+				if @board.squares[square].owner != @current_player && @board.squares[square].rank == "King"
+					move_is_okay = false
+				end
+			end
+		end
+
+#okay, there's a problem in that when I ask if the rook etc is legal, 
+#it checks to see if the target piece's owner matches the owner of 
+#the piece that's moving
+#this is a problem because there is no piece in the square that it's trying to find moves from,
+#since these are theoretical moves if the king moves there
+		return move_is_okay
 	end
 
 	#move to a square and capture a piece
