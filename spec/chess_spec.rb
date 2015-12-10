@@ -9,7 +9,11 @@ describe ChessGame do
 	context "when evaluating possible moves" do
 
 		it "pawn locates correct moves" do
-			@game.move_piece([7, 1], [3, 2])
+			@game.board.squares.each do |k, v|
+				@game.board.squares[k] = nil
+			end
+			@game.board.squares[[2, 3]] = Chesspiece.new(@game.white_player, "Pawn", "WP")
+			@game.board.squares[[3, 2]] = Chesspiece.new(@game.black_player, "Rook", "BR")
 			legal_pawn_moves = @game.find_pawn_move([2, 3])
 			expect(legal_pawn_moves).to contain_exactly([3, 3], [4, 3], [3, 2])
 		end
