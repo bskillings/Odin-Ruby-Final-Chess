@@ -101,12 +101,8 @@ class Chessboard
 	#array elements are the keys of legal squares
 	#check direction, length, and if any pieces (yours or theirs) are in the way
 	def identify_legal_moves(current_square, current_player)
-		print current_square
-		puts current_player
-		current_piece = squares[current_square]
-		puts current_piece
+		current_piece = @squares[current_square]
 		current_piece_rank = current_piece.rank
-		puts current_piece.rank
 		legal_moves = []
 
 		case current_piece_rank
@@ -144,14 +140,14 @@ class Chessboard
 		#move forward one square if empty
 		current_key = current_square
 		try_this_square_key = [current_key[0] + forward, current_key[1]]
-		if squares[try_this_square_key] == nil 
+		if @squares[try_this_square_key] == nil 
 			potential_pawn_moves.push(try_this_square_key)
 		end
 
 		#move forward two squares if first time moving
 		if current_key[0] == starting_row
 			first_move_square_key = [current_key[0] + (forward * 2), current_key[1]]
-			if squares[first_move_square_key] == nil 
+			if @squares[first_move_square_key] == nil 
 				potential_pawn_moves.push(first_move_square_key)
 			end
 		end
@@ -159,8 +155,8 @@ class Chessboard
 		#move forward diagonally if capturing
 		test_capture_keys = [[current_key[0] + 1, current_key[1] - 1], [current_key[0] + 1, current_key[1] + 1]]
 		test_capture_keys.each do |square|
-			unless squares[square] == nil 
-				if squares[square].owner != current_player 
+			unless @squares[square] == nil 
+				if @squares[square].owner != current_player 
 					potential_pawn_moves.push(square)
 				end
 			end 
@@ -201,13 +197,13 @@ class Chessboard
 				#change direction if owned or edge of board
 				if test_this_square[0].between?(1, 8) && test_this_square[1].between?(1, 8)
 					#if there is not a piece here
-					if squares[test_this_square] == nil 
+					if @squares[test_this_square] == nil 
 						#add to the array of possible moves
 						legal_rook_moves.push(test_this_square)
 					#if there is a piece here
 					else 
 						#add to the array only if it's the opposite color
-						if squares[test_this_square].owner != current_player 
+						if @squares[test_this_square].owner != current_player 
 							legal_rook_moves.push(test_this_square)
 						end
 						#if there is any piece here, break out of the loop so you can change direction
@@ -240,7 +236,7 @@ class Chessboard
 		potential_knight_moves.each do |move|
 			#check if square is actually on the board
 			if move[0].between?(1, 8) && move[1].between?(1, 8)
-				if squares[move] == nil || squares[move].owner != current_player 
+				if @squares[move] == nil || @squares[move].owner != current_player 
 					legal_knight_moves.push(move)
 				end
 			end
@@ -271,13 +267,13 @@ class Chessboard
 				#change direction if owned or edge of board
 				if test_this_square[0].between?(1, 8) && test_this_square[1].between?(1, 8)
 					#if there is not a piece here
-					if squares[test_this_square] == nil 
+					if @squares[test_this_square] == nil 
 						#add to the array of possible moves
 						legal_bishop_moves.push(test_this_square)
 					#if there is a piece here
 					else 
 						#add to the array only if it's the opposite color
-						if squares[test_this_square].owner != current_player 
+						if @squares[test_this_square].owner != current_player 
 							legal_bishop_moves.push(test_this_square)
 						end
 						#if there is any piece here, break out of the loop so you can change direction
@@ -325,13 +321,13 @@ class Chessboard
 				#change direction if owned or edge of board
 				if test_this_square[0].between?(1, 8) && test_this_square[1].between?(1, 8)
 					#if there is not a piece here
-					if squares[test_this_square] == nil 
+					if @squares[test_this_square] == nil 
 						#add to the array of possible moves
 						legal_queen_moves.push(test_this_square)
 					#if there is a piece here
 					else 
 						#add to the array only if it's the opposite color
-						if squares[test_this_square].owner != current_player 
+						if @squares[test_this_square].owner != current_player 
 							legal_queen_moves.push(test_this_square)
 						end
 						#if there is any piece here, break out of the loop so you can change direction
@@ -365,7 +361,7 @@ class Chessboard
 			#check if square is actually on the board
 			if move[0].between?(1, 8) && move[1].between?(1, 8)
 				#check if it is empty or contains another piece
-				if squares[move] == nil || squares[move].owner != squares[current_square].owner
+				if @squares[move] == nil || @squares[move].owner != @squares[current_square].owner
 					legal_king_moves.push(move)
 				end
 			end
@@ -392,8 +388,8 @@ class Chessboard
 		pawn_could_kill_from_here = current_player.color == "White" ? [[square_to_test[0] + 1, square_to_test[1] + 1]] : [square_to_test[0] + 1, square_to_test[1] - 1]
 		pawn_could_kill_from_here.each do |square|
 			if square[0].between?(1, 8) && square[1].between?(1, 8)
-				if squares[square]
-					if squares[square].owner != current_player && squares[square].rank == "Pawn"
+				if @squares[square]
+					if @squares[square].owner != current_player && @squares[square].rank == "Pawn"
 						move_is_okay = false
 					end
 				end
@@ -402,8 +398,8 @@ class Chessboard
 
 		rook_could_kill_from_here = find_rook_move(square_to_test, current_player)
 		rook_could_kill_from_here.each do |square|
-			if squares[square]
-				if squares[square].owner != current_player && squares[square].rank == "Rook"
+			if @squares[square]
+				if @squares[square].owner != current_player && @squares[square].rank == "Rook"
 					move_is_okay = false
 				end
 			end
@@ -411,8 +407,8 @@ class Chessboard
 
 		knight_could_kill_from_here = find_knight_move(square_to_test, current_player)
 		knight_could_kill_from_here.each do |square|
-			if squares[square]
-				if squares[square].owner != current_player && squares[square].rank == "Knight"
+			if @squares[square]
+				if @squares[square].owner != current_player && @squares[square].rank == "Knight"
 					move_is_okay = false
 				end
 			end
@@ -420,8 +416,8 @@ class Chessboard
 
 		bishop_could_kill_from_here = find_bishop_move(square_to_test, current_player)
 		bishop_could_kill_from_here.each do |square|
-			if squares[square]
-				if squares[square].owner != current_player && squares[square].rank == "Bishop"
+			if @squares[square]
+				if @squares[square].owner != current_player && @squares[square].rank == "Bishop"
 					move_is_okay = false
 				end
 			end
@@ -429,8 +425,8 @@ class Chessboard
 
 		queen_could_kill_from_here = find_queen_move(square_to_test, current_player)
 		queen_could_kill_from_here.each do |square|
-			if squares[square]
-				if squares[square].owner != current_player && squares[square].rank == "Queen"
+			if @squares[square]
+				if @squares[square].owner != current_player && @squares[square].rank == "Queen"
 					move_is_okay = false
 				end
 			end
@@ -454,8 +450,8 @@ class Chessboard
 		end
 
 		king_could_kill_from_here.each do |square|
-			if squares[square]
-				if squares[square].owner != current_player && squares[square].rank == "King"
+			if @squares[square]
+				if @squares[square].owner != current_player && @squares[square].rank == "King"
 					move_is_okay = false
 				end
 			end
