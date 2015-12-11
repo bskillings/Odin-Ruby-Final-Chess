@@ -9,3 +9,8 @@ class Chesspiece
 	end
 
 end
+
+#the problem with putting piece move rules here is that it needs to know the status of the 
+#rest of the pieces, and it seems inefficient to pass that in
+
+#figure out how to get info from calling class into here
