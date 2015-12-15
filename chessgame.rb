@@ -2,10 +2,14 @@ class ChessGame
 	attr_accessor :current_player, :board, :white_player, :black_player
 
 	def initialize
-		@white_player = Player.new("White")
-		@black_player = Player.new("Black")
+		@white_player = HumanPlayer.new("White")
+		@black_player = HumanPlayer.new("Black")
 		@current_player = @white_player
 		@board = Chessboard.new(@white_player, @black_player)
+		@game_over = false
+		take_turn
+		
+
 	end
 
 	#moving a piece from one square to another
@@ -14,26 +18,27 @@ class ChessGame
 
 	#not sure how to connect the situations here to the output, you can't move there, captured a piece, etc
 	#ugh I figured it out it's probably event handlers ugh ugh ugh
+	def take_turn
 
+		while @game_over == false
+			puts @board.create_chessboard_string
+			from = @current_player.get_from(@board)
+			to = @current_player.get_to(@board, from)
+			move_piece(from, to)
+			#if something something, game_over = true
+			@current_player = (@current_player == @white_player) ? @black_player : @white_player
+		end
+
+	end
 
 		#piece moving logic has been moved to ChessBoard
 		#realistically event handlers would replace the status messages
-		def move_piece(from, to)
-		current_piece = @board.squares[from]
-		possible_target_squares = @board.identify_legal_moves(from, @current_player)
-		if possible_target_squares.include?(to)
-			if board.squares[to] != nil
-				status_message = "captured"
-			else
-				status_message = "moved"
-			end
-			moving_piece = @board.squares[from]
-			@board.squares[to] = moving_piece
-			@board.squares[from] = nil
-		else
-			status_message = "not allowed"
-		end
+	def move_piece(from, to)
+		moving_piece = @board.squares[from]
+		@board.squares[to] = moving_piece
+		@board.squares[from] = nil
 	end
+
 
 	#move to a square and capture a piece
 	def capture_piece(current_square, target_square)
