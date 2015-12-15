@@ -2,11 +2,22 @@ require_relative "human_player"
 require_relative "computer_player"
 require_relative "chesspiece"
 require_relative "chessboard"
-require_relative "chessio"
 require_relative "chessgame"
 
-#I think what I need to do is have an overarching class that creates instances of io and game?
 
 
 start = ChessGame.new
 
+#list of things to do:
+
+	#mess around with coordinates to make them more intuitive
+
+	#figure out and implement check and checkmate
+		#maybe at the first of every turn, check for check to see if check
+		#if possible moves for king is empty, and if no one can block, checkmate
+
+	#implement save and load
+
+	#implement randomized computer moves	
+
+	#implement sockets

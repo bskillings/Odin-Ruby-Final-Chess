@@ -98,7 +98,8 @@ class Chessboard
 		return chessboard_string
 	end
 
-		def is_this_move_legal(from, to)
+	#check if a given move is legal
+	def is_this_move_legal(from, to)
 		current_piece = squares[from]
 		possible_target_squares = identify_legal_moves(from, squares[from].owner)
 		unless possible_target_squares.include?(to)
@@ -114,8 +115,6 @@ class Chessboard
 	#array elements are the keys of legal squares
 	#check direction, length, and if any pieces (yours or theirs) are in the way
 	def identify_legal_moves(current_square, current_player)
-		#this is being hit twice, and the second time is nil so it barfs
-		#am I seriously going to have to copy this into chess.rb so the debugger will work??
 		current_piece = @squares[current_square]
 		current_piece_rank = current_piece.rank
 		legal_moves = []

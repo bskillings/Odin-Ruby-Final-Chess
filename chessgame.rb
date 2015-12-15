@@ -32,17 +32,15 @@ class ChessGame
 	end
 
 		#piece moving logic has been moved to ChessBoard
-		#realistically event handlers would replace the status messages
 	def move_piece(from, to)
 		moving_piece = @board.squares[from]
+		puts "Moved #{moving_piece.owner.color} #{moving_piece.rank} from #{from} to #{to}"
+		if @board.squares[to]
+			captured_piece = @board.squares[to]
+			puts "Captured #{captured_piece.owner.color} #{captured_piece.rank}"
+		end
 		@board.squares[to] = moving_piece
 		@board.squares[from] = nil
-	end
-
-
-	#move to a square and capture a piece
-	def capture_piece(current_square, target_square)
-
 	end
 
 end

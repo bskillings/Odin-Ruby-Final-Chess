@@ -7,6 +7,7 @@ class HumanPlayer
 		@color = color
 	end
 
+		#ask for piece to move, accept only if owned by current player
 		def get_from(board)
 		puts "#{color}, it's your move."
 		puts "Please enter the coordinates of the piece you want to move (vertical coordinate first) like this 1, 2"
@@ -37,6 +38,7 @@ class HumanPlayer
 		return from
 	end
 
+	#ask where to move to, accept only if legal move
 	def get_to(board, from)
 		moving_piece = board.squares[from]
 		puts "Where would you like to move your #{moving_piece.owner.color} #{moving_piece.rank}?"

@@ -162,4 +162,3 @@ describe ChessGame do
 	end
 end
 
-#to test the io I think I'm giong to have to do mocks and stubs
