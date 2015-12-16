@@ -7,6 +7,7 @@ require_relative "chessgame"
 
 
 start = ChessGame.new
+start.start_game
 
 #list of things to do:
 

@@ -1,7 +1,7 @@
 
 class Chessboard
 
-	attr_accessor :squares
+	attr_accessor :squares, :white_player, :black_player
 
 	#squares is a hash with string keys denoting location of squares
 	#each element is one square
@@ -60,8 +60,8 @@ class Chessboard
 			@squares[[row_to_fill, 4]] = Chesspiece.new(owner, "King", "#{color}K")
 			@squares[[row_to_fill, 5]] = Chesspiece.new(owner, "Queen", "#{color}Q")
 		else
-			@squares[[row_to_fill, 5]] = Chesspiece.new(owner, "King", "#{color}Q")
-			@squares[[row_to_fill, 4]] = Chesspiece.new(owner, "Queen", "#{color}K")
+			@squares[[row_to_fill, 5]] = Chesspiece.new(owner, "Queen", "#{color}Q")
+			@squares[[row_to_fill, 4]] = Chesspiece.new(owner, "King", "#{color}K")
 		end
 
 		#create pawns

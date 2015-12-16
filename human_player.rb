@@ -41,16 +41,18 @@ class HumanPlayer
 	#ask where to move to, accept only if legal move
 	def get_to(board, from)
 		moving_piece = board.squares[from]
-		puts "Where would you like to move your #{moving_piece.owner.color} #{moving_piece.rank}?"
+		puts "Where would you like to move your #{moving_piece.owner.color} #{moving_piece.rank}? (0 to move different piece)"
 		to_okay = false
 		to_string = gets.chomp.split(", ")
 		to = to_string.map do |coordinate|
 			coordinate.to_i
 		end
 		while to_okay == false
-			if (to[0] < 1 || to[0] > 8) || (to[1] < 1 || to[1] > 8)
+			if to[0] == 0
+				return to
+			elsif (to[0] < 1 || to[0] > 8) || (to[1] < 1 || to[1] > 8)
 				puts "That's not a space"
-				puts "Where would you like to move your ##{moving_piece.owner.color} #{moving_piece.rank}?"
+				puts "Where would you like to move your ##{moving_piece.owner.color} #{moving_piece.rank}? (0 to move different piece)"
 				to_string = gets.chomp.split(", ")
 				to = to_string.map do |coordinate|
 					coordinate.to_i
@@ -59,7 +61,7 @@ class HumanPlayer
 				legal_move = board.is_this_move_legal(from, to)
 				if legal_move == false
 					puts "You can't move there"
-					puts "Where would you like to move your ##{moving_piece.owner.color} #{moving_piece.rank}?"
+					puts "Where would you like to move your ##{moving_piece.owner.color} #{moving_piece.rank}? (0 to move different piece)"
 					to_string = gets.chomp.split(", ")
 					to = to_string.map do |coordinate|
 						coordinate.to_i

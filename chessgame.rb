@@ -7,9 +7,11 @@ class ChessGame
 		@current_player = @white_player
 		@board = Chessboard.new(@white_player, @black_player)
 		@game_over = false
-		take_turn
-		
 
+	end
+
+	def start_game
+		take_turn
 	end
 
 	#moving a piece from one square to another
@@ -24,9 +26,24 @@ class ChessGame
 			puts @board.create_chessboard_string
 			from = @current_player.get_from(@board)
 			to = @current_player.get_to(@board, from)
+			while to == [0]
+				from = @current_player.get_from(@board)
+				to = @current_player.get_to(@board, from)
+			end
 			move_piece(from, to)
-			#if something something, game_over = true
 			@current_player = (@current_player == @white_player) ? @black_player : @white_player
+			opponent_king_location = []
+			@board.squares.each do|k, v| 
+				unless v == nil
+					if v.owner == @current_player && v.rank == "King"
+						opponent_king_location.push(k)
+					end
+				end
+			end
+			if @board.check_for_check(opponent_king_location[0], @current_player) == false
+				puts "#{@current_player.color} King is in check!"
+			end
+			#if something something, game_over = true
 		end
 
 	end
