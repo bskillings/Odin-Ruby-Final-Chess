@@ -95,6 +95,7 @@ class Chessboard
 			end
 			i += 1
 		end
+		chessboard_string.concat("\r\n\n")
 		return chessboard_string
 	end
 
@@ -384,7 +385,7 @@ class Chessboard
 		#omit moves that would result in check
 		check_free_king_moves = []
 		legal_king_moves.each do |move|
-			 if check_for_check(move, current_player)
+			 if is_this_piece_in_danger(move, current_player) == []
 			 	check_free_king_moves.push(move)
 			 end
 		end
@@ -395,8 +396,9 @@ class Chessboard
 
 	end
 
-	def check_for_check(square_to_test, current_player)
-		move_is_okay = true
+	def is_this_piece_in_danger(square_to_test, current_player)
+		#returns the coordinates of pieces that can attack
+		pieces_that_can_attack = []
 		
 
 		pawn_could_kill_from_here = current_player.color == "White" ? [[square_to_test[0] + 1, square_to_test[1] + 1]] : [square_to_test[0] + 1, square_to_test[1] - 1]
@@ -404,7 +406,7 @@ class Chessboard
 			if square[0].between?(1, 8) && square[1].between?(1, 8)
 				if @squares[square]
 					if @squares[square].owner != current_player && @squares[square].rank == "Pawn"
-						move_is_okay = false
+						pieces_that_can_attack.push(square)
 					end
 				end
 			end
@@ -414,7 +416,7 @@ class Chessboard
 		rook_could_kill_from_here.each do |square|
 			if @squares[square]
 				if @squares[square].owner != current_player && @squares[square].rank == "Rook"
-					move_is_okay = false
+					pieces_that_can_attack.push(square)
 				end
 			end
 		end
@@ -423,7 +425,7 @@ class Chessboard
 		knight_could_kill_from_here.each do |square|
 			if @squares[square]
 				if @squares[square].owner != current_player && @squares[square].rank == "Knight"
-					move_is_okay = false
+					pieces_that_can_attack.push(square)
 				end
 			end
 		end
@@ -432,7 +434,7 @@ class Chessboard
 		bishop_could_kill_from_here.each do |square|
 			if @squares[square]
 				if @squares[square].owner != current_player && @squares[square].rank == "Bishop"
-					move_is_okay = false
+					pieces_that_can_attack.push(square)
 				end
 			end
 		end
@@ -441,7 +443,7 @@ class Chessboard
 		queen_could_kill_from_here.each do |square|
 			if @squares[square]
 				if @squares[square].owner != current_player && @squares[square].rank == "Queen"
-					move_is_okay = false
+					pieces_that_can_attack.push(square)
 				end
 			end
 		end
@@ -466,13 +468,79 @@ class Chessboard
 		king_could_kill_from_here.each do |square|
 			if @squares[square]
 				if @squares[square].owner != current_player && @squares[square].rank == "King"
-					move_is_okay = false
+					pieces_that_can_attack.push(square)
 				end
 			end
 		end
 
-		return move_is_okay
+		return pieces_that_can_attack
+
+		#thought of another edge case!
+		#king moves farther down line of attack.  Would this show up?
+		#I don't think so because the king blocks it for now
 	end
 
+	def identify_checkmate(king_location, current_player)
+		attacking_player = current_player == white_player ? black_player : white_player
+
+		#check if king can move using is_this_piece_in_danger
+		can_king_move = false
+		can_attacker_be_captured = false
+		can_attacker_be_blocked = false
+
+		#attacking pieces is an array of coordinates of pieces that can attack
+		attacking_pieces = is_this_piece_in_danger(king_location, current_player)
+		if attacking_pieces == []
+			can_king_move == true
+		
+		else #neither of the following are relevant unless there are attackers
+		
+			#check if attacker can be captured
+			attacking_pieces.each do |attacker|
+				can_kill_attacker = is_this_piece_in_danger(attacker, attacking_player)
+				if can_kill_attacker.any?
+					can_attacker_be_captured = true
+				end 
+			end
+			
+			#check if attacker can be blocked
+			attackers_that_cannot_be_blocked = []
+			attacking_pieces.each do |attacker|
+				attacker_moves = identify_legal_moves(attacker, attacking_player)
+
+				#copy piece to king location, test, put king back
+				king_placeholder = @squares[king_location]
+				@squares[king_location] = @squares[attacker]
+				moves_from_king = identify_legal_moves(king_location, attacking_player)
+				@squares[king_location] = king_placeholder
+
+				#make an array of all squares in both groups
+				between_squares = []
+				attacker_moves.each do |between|
+					if moves_from_king.include?(between)
+						between_squares.push(between)
+					end
+				end
+
+				#test all between squares
+				between_squares.each do |between|
+					pieces_that_can_block = is_this_piece_in_danger(between, attacking_player)
+					if pieces_that_can_block.any?
+						can_attacker_be_blocked = true
+					end
+					#not perfect because for example the queen could have the same
+					#move show up on both in another direction
+					#direction is so fragmented across pieces though
+				end
+			end
+		end
+		
+		if can_king_move || can_attacker_be_captured || can_attacker_be_blocked
+			return true
+		else
+			return false
+		end
+
+	end
 
 end

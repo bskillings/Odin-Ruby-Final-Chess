@@ -14,12 +14,7 @@ class ChessGame
 		take_turn
 	end
 
-	#moving a piece from one square to another
-	#will need to check if move is legal
-	#will need to capture piece if applicable
 
-	#not sure how to connect the situations here to the output, you can't move there, captured a piece, etc
-	#ugh I figured it out it's probably event handlers ugh ugh ugh
 	def take_turn
 
 		while @game_over == false
@@ -32,6 +27,7 @@ class ChessGame
 			end
 			move_piece(from, to)
 			@current_player = (@current_player == @white_player) ? @black_player : @white_player
+			#find out if this move put the king in check
 			opponent_king_location = []
 			@board.squares.each do|k, v| 
 				unless v == nil
@@ -40,15 +36,21 @@ class ChessGame
 					end
 				end
 			end
-			if @board.check_for_check(opponent_king_location[0], @current_player) == false
+			if @board.is_this_piece_in_danger(opponent_king_location[0], @current_player) == false
 				puts "#{@current_player.color} King is in check!"
 			end
-			#if something something, game_over = true
+			if @board.identify_checkmate(opponent_king_location[0], @current_player) == true
+				@game_over = true
+				puts "#{current_player.color} King is in checkmate!"
+				puts "Game over!"
+			end
 		end
+		#I don't like how the current player swaps
 
 	end
 
 		#piece moving logic has been moved to ChessBoard
+		#identifying legal moves happens while player in inputting their move
 	def move_piece(from, to)
 		moving_piece = @board.squares[from]
 		puts "Moved #{moving_piece.owner.color} #{moving_piece.rank} from #{from} to #{to}"
