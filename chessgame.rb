@@ -16,15 +16,26 @@ class ChessGame
 
 
 	def take_turn
+		#in order to save it I should probably put another layer here
+		#separate out the input to allow for saving etc
+		#then call game action or move depending on what it says
 
 		while @game_over == false
 			puts @board.create_chessboard_string
+
 			from = @current_player.get_from(@board)
+			#if from is game, go to game functions, else go on and get to
+			while from == "game"
+				file_actions
+				from = @current_player.get_from(@board)
+			end
+
 			to = @current_player.get_to(@board, from)
 			while to == [0]
 				from = @current_player.get_from(@board)
 				to = @current_player.get_to(@board, from)
 			end
+
 			move_piece(from, to)
 			@current_player = (@current_player == @white_player) ? @black_player : @white_player
 			#find out if this move put the king in check
@@ -61,5 +72,41 @@ class ChessGame
 		@board.squares[to] = moving_piece
 		@board.squares[from] = nil
 	end
+
+	def file_actions
+		puts "Type \"save\", \"load\", or \"exit\""
+		action = gets.chomp.downcase
+		case action
+		when "save"
+			save_game
+		when "load"
+			load_game
+		when "exit"
+			puts "Please press Ctrl-C to exit"
+			dummy = gets
+		else
+			puts "Did not understand, returning to game"
+		end
+	end
+
+	def save_game 
+		puts "Name your savegame"
+		filename = gets.chomp
+		save_array = Array.new [@board, @current_player]
+		File.open("#{filename}.yaml", "w") {|f| f.write(YAML::dump(save_array))}
+		puts "#{filename}.yaml saved"
+	end
+
+	def load_game
+		puts "Type the name of your savegame"
+		filename = gets.chomp
+		file_to_load = File.new("#{filename}.yaml")
+		load_array = YAML::load(file_to_load)
+		puts "#{filename}.yaml loaded"
+		@board = load_array[0]
+		@current_player = load_array[1]
+		puts @board.create_chessboard_string
+	end
+
 
 end

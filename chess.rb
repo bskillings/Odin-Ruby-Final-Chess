@@ -3,6 +3,8 @@ require_relative "computer_player"
 require_relative "chesspiece"
 require_relative "chessboard"
 require_relative "chessgame"
+require "yaml"
+
 
 
 
