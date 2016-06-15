@@ -16,9 +16,6 @@ class ChessGame
 
 
 	def take_turn
-		#in order to save it I should probably put another layer here
-		#separate out the input to allow for saving etc
-		#then call game action or move depending on what it says
 
 		while @game_over == false
 			puts @board.create_chessboard_string
@@ -37,8 +34,9 @@ class ChessGame
 			end
 
 			move_piece(from, to)
+			@opposing_player = @current_player
 			@current_player = (@current_player == @white_player) ? @black_player : @white_player
-			#find out if this move put the king in check
+			#find out if this move puts the king in check
 			opponent_king_location = []
 			@board.squares.each do|k, v| 
 				unless v == nil
@@ -47,10 +45,10 @@ class ChessGame
 					end
 				end
 			end
-			if @board.is_this_piece_in_danger(opponent_king_location[0], @current_player) == false
+			if @opposing_player.chosen_move.is_this_piece_in_danger(opponent_king_location[0], @current_player) == false
 				puts "#{@current_player.color} King is in check!"
 			end
-			if @board.identify_checkmate(opponent_king_location[0], @current_player) == true
+			if @opposing_player.chosen_move.identify_checkmate(opponent_king_location[0], @current_player, @opposing_player) == true
 				@game_over = true
 				puts "#{current_player.color} King is in checkmate!"
 				puts "Game over!"
@@ -60,8 +58,7 @@ class ChessGame
 
 	end
 
-		#piece moving logic has been moved to ChessBoard
-		#identifying legal moves happens while player in inputting their move
+	#identifying legal moves happens while player in inputting their move
 	def move_piece(from, to)
 		moving_piece = @board.squares[from]
 		puts "Moved #{moving_piece.owner.color} #{moving_piece.rank} from #{from} to #{to}"
